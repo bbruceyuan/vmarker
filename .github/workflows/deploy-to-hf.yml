@@ -28,6 +28,9 @@ jobs:
       - name: Export requirements.txt
         run: |
           uv export --no-hashes --no-dev -o requirements.txt
+          # 移除本地包引用（-e .），因为 HF Space 构建时会有问题
+          grep -v "^-e \." requirements.txt > requirements_hf.txt || true
+          mv requirements_hf.txt requirements.txt
       
       - name: Prepare deployment files
         run: |
@@ -37,10 +40,13 @@ jobs:
           # 复制必要文件到部署目录
           cp examples/app.py /tmp/hf-deploy/app.py
           cp requirements.txt /tmp/hf-deploy/
-          cp pyproject.toml /tmp/hf-deploy/
-          cp -r src /tmp/hf-deploy/
+          cp -r src/chapterbar /tmp/hf-deploy/
           
           cp LICENSE /tmp/hf-deploy/ || echo "LICENSE not found, skipping"
+          
+          # 修改 app.py 以使用正确的导入路径
+          # 确保 src 目录在 Python 路径中
+          sed -i '1i import sys\nsys.path.insert(0, "/app/src")' /tmp/hf-deploy/app.py
           
           # 创建带有 HF Space 配置的 README.md
           cat > /tmp/hf-deploy/README.md << 'EOF'
