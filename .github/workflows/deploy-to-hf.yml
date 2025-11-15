@@ -28,8 +28,8 @@ jobs:
       - name: Export requirements.txt
         run: |
           uv export --no-hashes --no-dev -o requirements.txt
-          # 移除本地包引用（-e .），因为 HF Space 构建时会有问题
-          grep -v "^-e \." requirements.txt > requirements_hf.txt || true
+          # 移除本地包引用（-e .）和 Python 3.13 特定的包
+          grep -v "^-e \." requirements.txt | grep -v "audioop-lts" > requirements_hf.txt || true
           mv requirements_hf.txt requirements.txt
       
       - name: Prepare deployment files
@@ -56,6 +56,7 @@ jobs:
           colorFrom: blue
           colorTo: purple
           sdk: gradio
+          python_version: "3.13"
           sdk_version: "5.9.1"
           app_file: app.py
           pinned: false
