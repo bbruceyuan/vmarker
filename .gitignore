@@ -8,7 +8,6 @@ CLAUDE.md
 # 输出文件
 outputs/
 inputs/
-docs/
 
 # 生成的视频文件
 *.mov

@@ -39,9 +39,60 @@ jobs:
           cp requirements.txt /tmp/hf-deploy/
           cp -r src /tmp/hf-deploy/
           
-          cp README.md /tmp/hf-deploy/ || echo "README.md not found, skipping"
-          
           cp LICENSE /tmp/hf-deploy/ || echo "LICENSE not found, skipping"
+          
+          # 创建带有 HF Space 配置的 README.md
+          cat > /tmp/hf-deploy/README.md << 'EOF'
+          ---
+          title: Auto Chapter Bar
+          emoji: 🎬
+          colorFrom: blue
+          colorTo: purple
+          sdk: gradio
+          sdk_version: "5.9.1"
+          app_file: app.py
+          pinned: false
+          license: apache-2.0
+          ---
+          
+          # 🎬 Auto Chapter Bar
+          
+          Auto Chapter Bar（简称 `acb`）是一个开源的 Python 工具，可以快速将 SRT 字幕文件转换为带有 Alpha 透明通道的视频章节进度条。
+          
+          ## ✨ 核心特性
+          
+          - **🎨 透明通道支持**：输出 RGBA 格式，可完美叠加在任意视频上
+          - **🤖 AI 智能分段**：基于 Moonshot LLM 理解语义边界，自动识别章节
+          - **🔒 隐私优先**：完全本地处理，视频文件不上传云端
+          - **⚡ 高性能**：多进程并行处理，速度提升 2-4 倍
+          - **🎛️ 三种模式**：AI 智能模式、自动分段模式、手动配置模式
+          
+          ## 🚀 使用方法
+          
+          1. 上传 SRT 字幕文件
+          2. 输入视频总时长（秒）
+          3. 选择生成模式（AI 或 Auto）
+          4. 点击生成按钮
+          5. 下载生成的章节进度条视频
+          
+          ## 📦 在视频编辑软件中使用
+          
+          生成的视频带有透明通道（Alpha Channel），可以直接叠加在原视频上：
+          
+          - **Adobe Premiere Pro**：导入后放在最上层视频轨道
+          - **剪映（CapCut）**：添加为画中画轨道
+          - **DaVinci Resolve**：放在视频轨道最上层
+          
+          ## 🔗 项目链接
+          
+          - **GitHub**: https://github.com/bbruceyuan/auto-chapter-bar
+          - **文档**: 查看 GitHub 仓库获取完整文档
+          - **许可证**: Apache License 2.0
+          
+          ---
+          
+          ⭐ 如果觉得这个项目有帮助，请在 GitHub 给个 Star！
+          EOF
           
           # 创建 .gitignore for HF Space
           cat > /tmp/hf-deploy/.gitignore << 'EOF'

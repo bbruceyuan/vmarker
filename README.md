@@ -1,9 +1,13 @@
+<div align="center">
+
 # 🎬 Auto Chapter Bar
 
 [![Hugging Face Space](https://img.shields.io/badge/🤗%20Hugging%20Face-Space-blue)](https://huggingface.co/spaces/bbruceyuan/auto-chapter-bar)
 [![Python 3.13+](https://img.shields.io/badge/python-3.13+-blue.svg)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![GitHub stars](https://img.shields.io/github/stars/bbruceyuan/auto-chapter-bar?style=social)](https://github.com/bbruceyuan/auto-chapter-bar/stargazers)
+
+</div>
 
 Auto Chapter Bar（简称 `acb`）是一个开源的 Python 工具，可以快速将 SRT 字幕文件转换为带有 Alpha 透明通道的视频章节进度条。它特别适用于提升长视频的观看体验和完播率。
 
@@ -378,7 +382,11 @@ Apache License 2.0 - 详见 [LICENSE](LICENSE) 文件
 
 ---
 
+<div align="center">
+
 # 🎬 Auto Chapter Bar (English)
+
+</div>
 
 Auto Chapter Bar (or `acb` in CLI) is an open-source Python tool that converts SRT subtitle files into transparent video chapter progress bars with alpha channel. Perfect for improving watch time and completion rates of long-form videos.
 
