@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auto-Chapter-Bar - AI驱动的视频章节进度条生成器</title>
+    <meta name="description" content="10秒自动生成专业级视频章节进度条，支持透明通道输出，完美兼容PR/剪映/达芬奇，基于AI智能分段，提升视频完播率60%+">
+    <meta name="keywords" content="视频章节进度条,AI视频分段,SRT字幕,PR插件,剪映,达芬奇,视频完播率">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .gradient-text { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .hover-lift { transition: transform 0.3s ease, box-shadow 0.3s ease; }
+        .hover-lift:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+        .feature-card { background: #f8f9fa; border-radius: 12px; padding: 30px; height: 100%; }
+        .pricing-card { border-radius: 12px; padding: 30px; height: 100%; display: flex; flex-direction: column; }
+        .btn-primary { background: #667eea; color: white; padding: 12px 30px; border-radius: 8px; font-weight: 600; display: inline-block; text-decoration: none; transition: background 0.3s ease; }
+        .btn-primary:hover { background: #5a67d8; }
+        .btn-outline { border: 2px solid #667eea; color: #667eea; padding: 12px 30px; border-radius: 8px; font-weight: 600; display: inline-block; text-decoration: none; transition: all 0.3s ease; }
+        .btn-outline:hover { background: #667eea; color: white; }
+        .demo-video { max-width: 100%; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Anchor for top -->
+    <div id="top"></div>
+
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <a href="#top" class="text-2xl font-bold gradient-text hover:opacity-80 transition-opacity">🎬 Auto-Chapter-Bar</a>
+                </div>
+                <div class="hidden md:flex space-x-8">
+                    <a href="#features" class="text-gray-700 hover:text-purple-600 font-medium transition-colors" data-i18n="nav.features">特性</a>
+                    <a href="#pricing" class="text-gray-700 hover:text-purple-600 font-medium transition-colors" data-i18n="nav.pricing">定价</a>
+                    <a href="#faq" class="text-gray-700 hover:text-purple-600 font-medium transition-colors" data-i18n="nav.faq">FAQ</a>
+                    <a href="https://huggingface.co/spaces/bbruceyuan/auto-chapter-bar" class="text-gray-700 hover:text-purple-600 font-medium transition-colors" target="_blank">Demo</a>
+                    <a href="https://github.com/bbruceyuan/auto-chapter-bar" class="text-gray-700 hover:text-purple-600 font-medium transition-colors" target="_blank">GitHub</a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="https://huggingface.co/spaces/bbruceyuan/auto-chapter-bar" target="_blank" class="btn-primary" data-i18n="nav.try_free">免费试用</a>
+                    <button id="lang-switch" class="text-gray-700 hover:text-purple-600 font-medium transition-colors border border-gray-300 rounded px-3 py-1" onclick="switchLanguage()">
+                        <span id="lang-text">EN</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="gradient-bg text-white py-20">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h1 class="text-5xl md:text-6xl font-bold mb-6 leading-tight" data-i18n="hero.title">
+                AI 驱动的视频章节进度条生成器
+            </h1>
+            <p class="text-xl md:text-2xl mb-8 max-w-3xl mx-auto opacity-90" data-i18n="hero.subtitle">
+                10 秒自动生成专业级章节进度条动画，提升视频完播率 60%+
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
+                <a href="https://huggingface.co/spaces/bbruceyuan/auto-chapter-bar" target="_blank" class="bg-white text-purple-600 px-8 py-4 rounded-lg text-lg font-bold hover:bg-gray-100 transition-colors inline-flex items-center">
+                    <i class="fas fa-rocket mr-2"></i>
+                    <span data-i18n="hero.try_free">免费试用 Demo</span>
+                </a>
+                <a href="#pricing" class="border-2 border-white text-white px-8 py-4 rounded-lg text-lg font-bold hover:bg-white hover:text-purple-600 transition-colors inline-flex items-center">                                <span data-i18n="hero.view_pricing">查看定价</span>
+                </a>
+            </div>
+
+            <!-- Stats -->
+            <div class="grid grid-cols-3 gap-8 max-w-2xl mx-auto">
+                <div class="text-center">
+                    <div class="text-3xl font-bold">20,000+</div>
+                    <div class="text-sm opacity-80" data-i18n="hero.stats_videos">已处理视频</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-3xl font-bold">60%</div>
+                    <div class="text-sm opacity-80" data-i18n="hero.stats_retention">完播率提升</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-3xl font-bold">4.9/5</div>
+                    <div class="text-sm opacity-80" data-i18n="hero.stats_rating">用户评分</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Problem Section -->
+    <section class="py-20 bg-white">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold mb-4" data-i18n="problem.title">🎯 为什么长视频完播率低？</h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto" data-i18n="problem.subtitle">
+                    观众不知道视频结构、无法快速跳转、认知负荷过高
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="feature-card hover-lift">
+                    <div class="text-purple-600 text-4xl mb-4">😵</div>
+                    <h3 class="text-2xl font-bold mb-4" data-i18n="problem.lost.title">迷失方向</h3>
+                    <p class="text-gray-600" data-i18n="problem.lost.desc">
+                        不知道视频整体结构，不知道什么时候到重点，容易中途离开
+                    </p>
+                </div>
+
+                <div class="feature-card hover-lift">
+                    <div class="text-purple-600 text-4xl mb-4">⏭️</div>
+                    <h3 class="text-2xl font-bold mb-4" data-i18n="problem.skip.title">无法跳转</h3>
+                    <p class="text-gray-600" data-i18n="problem.skip.desc">
+                        平台原生章节功能只在播放器内有效，无法嵌入到视频中永久使用
+                    </p>
+                </div>
+
+                <div class="feature-card hover-lift">
+                    <div class="text-purple-600 text-4xl mb-4">⏰</div>
+                    <h3 class="text-2xl font-bold mb-4" data-i18n="problem.time.title">耗时太长</h3>
+                    <p class="text-gray-600" data-i18n="problem.time.desc">
+                        在 PR/剪映/达芬奇中手动制作章节条需要 30-60 分钟
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-20 bg-gray-50">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold mb-4 gradient-text" data-i18n="features.main_title">✨ 核心特性</h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto" data-i18n="features.main_subtitle">
+                    专业级视频章节进度条，一键生成，完美集成
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="feature-card hover-lift">
+                    <div class="text-purple-600 text-4xl mb-4">⚡</div>
+                    <h3 class="text-2xl font-bold mb-4" data-i18n="features.speed.title">极速生成</h3>
+                    <p class="text-gray-600" data-i18n="features.speed.desc">
+                        10-40 秒自动生成，比手动制作快 100 倍。多进程并行处理，充分利用 CPU 性能
+                    </p>
+                </div>
+
+                <div class="feature-card hover-lift">
+                    <div class="text-purple-600 text-4xl mb-4">🤖</div>
+                    <h3 class="text-2xl font-bold mb-4" data-i18n="features.ai.title">AI 智能分段</h3>
+                    <p class="text-gray-600" data-i18n="features.ai.desc">
+                        基于 Moonshot AI 理解视频语义，自动识别主题转换点，生成最符合逻辑的章节
+                    </p>
+                </div>
+
+                <div class="feature-card hover-lift">
+                    <div class="text-purple-600 text-4xl mb-4">🎨</div>
+                    <h3 class="text-2xl font-bold mb-4" data-i18n="features.quality.title">专业品质</h3>
+                    <p class="text-gray-600" data-i18n="features.quality.desc">
+                        透明通道输出（RGBA），动态文字缩放，阴影效果，灰度配色，完美适配各种背景
+                    </p>
+                </div>
+
+                <div class="feature-card hover-lift">
+                    <div class="text-purple-600 text-4xl mb-4">🔒</div>
+                    <h3 class="text-2xl font-bold mb-4" data-i18n="features.privacy.title">隐私优先</h3>
+                    <p class="text-gray-600" data-i18n="features.privacy.desc">
+                        完全本地处理，SRT 字幕文件不上传云端。保护你的内容安全和商业机密
+                    </p>
+                </div>
+
+                <div class="feature-card hover-lift">
+                    <div class="text-purple-600 text-4xl mb-4">🌐</div>
+                    <h3 class="text-2xl font-bold mb-4" data-i18n="features.crossplatform.title">跨平台兼容</h3>
+                    <p class="text-gray-600" data-i18n="features.crossplatform.desc">
+                        支持 Windows、macOS、Linux。生成的视频兼容所有平台：B站、抖音、小红书、YouTube
+                    </p>
+                </div>
+
+                <div class="feature-card hover-lift">
+                    <div class="text-purple-600 text-4xl mb-4">🎛️</div>
+                    <h3 class="text-2xl font-bold mb-4" data-i18n="features.modes.title">三种模式</h3>
+                    <p class="text-gray-600" data-i18n="features.modes.desc">
+                        AI 智能模式、自动分段模式、手动配置模式。满足不同场景需求，灵活可控
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="py-20 bg-white">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold mb-4" data-i18n="how_it_works.title">📝 三步完成</h2>
+                <p class="text-xl text-gray-600" data-i18n="how_it_works.subtitle">
+                    上传 SRT → 生成章节 → 下载视频
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="text-center">
+                    <div class="bg-purple-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <span class="text-3xl font-bold text-purple-600">1</span>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4" data-i18n="how_it_works.step1.title">上传 SRT 文件</h3>
+                    <p class="text-gray-600" data-i18n="how_it_works.step1.desc">
+                        从你视频的字幕文件开始，支持标准 SRT 格式
+                    </p>
+                </div>
+
+                <div class="text-center">
+                    <div class="bg-purple-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <span class="text-3xl font-bold text-purple-600">2</span>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4" data-i18n="how_it_works.step2.title">AI 自动生成</h3>
+                    <p class="text-gray-600" data-i18n="how_it_works.step2.desc">
+                        选择 AI 智能模式或固定间隔，10 秒生成章节列表
+                    </p>
+                </div>
+
+                <div class="text-center">
+                    <div class="bg-purple-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <span class="text-3xl font-bold text-purple-600">3</span>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4" data-i18n="how_it_works.step3.title">下载透明视频</h3>
+                    <p class="text-gray-600" data-i18n="how_it_works.step3.desc">
+                        下载 MOV 格式视频（透明通道），导入剪辑软件即可
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Demo Video -->
+    <section class="py-20 bg-gray-50">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 class="text-4xl font-bold mb-8 gradient-text" data-i18n="demo.title">🎬 实际效果</h2>
+            <p class="text-xl text-gray-600 mb-8" data-i18n="demo.subtitle">
+                看看章节进度条在真实视频中的效果
+            </p>
+
+            <!-- 这里需要替换成你的实际演示视频 -->
+            <div class="bg-white rounded-xl p-8 shadow-lg">
+                <div class="bg-gradient-to-r from-purple-100 to-blue-100 rounded-lg p-12 mb-6">
+                    <i class="fas fa-play-circle text-6xl text-purple-600 mb-4"></i>
+                    <h3 class="text-2xl font-bold mb-2" data-i18n="demo.placeholder">点击观看演示视频</h3>
+                    <p class="text-gray-600" data-i18n="demo.subtitle2">（请在下方上传你的 SRT 文件，实时体验生成功能）</p>
+                </div>
+                <a href="https://huggingface.co/spaces/bbruceyuan/auto-chapter-bar" target="_blank" class="btn-primary text-lg">
+                    <i class="fas fa-rocket mr-2"></i>
+                    <span data-i18n="cta.try_free">立即试用 Demo</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Use Cases -->
+    <section class="py-20 bg-white">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold mb-4" data-i18n="use_cases.title">🎯 适用场景</h2>
+                <p class="text-xl text-gray-600" data-i18n="use_cases.subtitle">
+                    各种类型的长视频都能受益
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="bg-blue-50 border-l-4 border-blue-500 p-6 rounded-lg">
+                    <h3 class="text-xl font-bold mb-2 flex items-center">
+                        <i class="fas fa-graduation-cap mr-2 text-blue-600"></i>
+                        <span data-i18n="use_cases.online_course.title">📚 在线课程</span>
+                    </h3>
+                    <p class="text-gray-600" data-i18n="use_cases.online_course.desc">按知识模块自动分段，帮助学生快速定位重点</p>
+                </div>
+
+                <div class="bg-green-50 border-l-4 border-green-500 p-6 rounded-lg">
+                    <h3 class="text-xl font-bold mb-2 flex items-center">
+                        <i class="fas fa-video mr-2 text-green-600"></i>
+                        <span data-i18n="use_cases.live_stream.title">🎥 直播回放</span>
+                    </h3>
+                    <p class="text-gray-600" data-i18n="use_cases.live_stream.desc">固定间隔（5-10 分钟）快速处理长视频</p>
+                </div>
+
+                <div class="bg-purple-50 border-l-4 border-purple-500 p-6 rounded-lg">
+                    <h3 class="text-xl font-bold mb-2 flex items-center">
+                        <i class="fas fa-shopping-cart mr-2 text-purple-600"></i>
+                        <span data-i18n="use_cases.product_review.title">🛍️ 产品评测</span>
+                    </h3>
+                    <p class="text-gray-600" data-i18n="use_cases.product_review.desc">AI 智能识别评测环节，精确控制章节</p>
+                </div>
+
+                <div class="bg-yellow-50 border-l-4 border-yellow-500 p-6 rounded-lg">
+                    <h3 class="text-xl font-bold mb-2 flex items-center">
+                        <i class="fas fa-users mr-2 text-yellow-600"></i>
+                        <span data-i18n="use_cases.meeting_record.title">🎤 会议录像</span>
+                    </h3>
+                    <p class="text-gray-600" data-i18n="use_cases.meeting_record.desc">识别议题转换点，生成会议纪要式章节</p>
+                </div>
+
+                <div class="bg-red-50 border-l-4 border-red-500 p-6 rounded-lg">
+                    <h3 class="text-xl font-bold mb-2 flex items-center">
+                        <i class="fas fa-gamepad mr-2 text-red-600"></i>
+                        <span data-i18n="use_cases.game_commentary.title">🎮 游戏解说</span>
+                    </h3>
+                    <p class="text-gray-600" data-i18n="use_cases.game_commentary.desc">手动模式精确标记精彩时刻和关卡进度</p>
+                </div>
+
+                <div class="bg-indigo-50 border-l-4 border-indigo-500 p-6 rounded-lg">
+                    <h3 class="text-xl font-bold mb-2 flex items-center">
+                        <i class="fas fa-camera mr-2 text-indigo-600"></i>
+                        <span data-i18n="use_cases.vlog.title">📺 Vlog/日常</span>
+                    </h3>
+                    <p class="text-gray-600" data-i18n="use_cases.vlog.desc">固定间隔（3-5 分钟）轻松划分内容段落</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="py-20 bg-gray-50">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold mb-4 gradient-text" data-i18n="pricing.title">💳 简单易懂的定价</h2>
+                <p class="text-xl text-gray-600" data-i18n="pricing.subtitle">
+                    免费试用，按需付费，支持我们做得更好
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Free Plan -->
+                <div class="pricing-card bg-white border-2 border-gray-200 hover-lift">
+                    <div class="text-center mb-6">
+                        <h3 class="text-2xl font-bold mb-2" data-i18n="pricing.free.title">🆓 免费版</h3>
+                        <div class="text-4xl font-bold text-gray-800 mb-2" data-i18n="pricing.free.price">¥0</div>
+                        <p class="text-gray-600" data-i18n="pricing.free.desc">永久免费，无订阅</p>
+                    </div>
+
+                    <ul class="space-y-3 mb-8 flex-grow">
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span data-i18n="pricing.free.features[0]">固定间隔分段模式</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span data-i18n="pricing.free.features[1]">手动编辑和验证</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span data-i18n="pricing.free.features[2]">基础视频导出（MOV）</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-times text-gray-300 mr-3"></i>
+                            <span class="text-gray-400" data-i18n="pricing.free.non_features[0]">AI 智能分段</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-times text-gray-300 mr-3"></i>
+                            <span class="text-gray-400" data-i18n="pricing.free.non_features[1]">优先技术支持</span>
+                        </li>
+                    </ul>
+
+                    <a href="https://huggingface.co/spaces/bbruceyuan/auto-chapter-bar" target="_blank" class="btn-outline w-full text-center block">
+                        <span data-i18n="pricing.free.cta">立即试用</span>
+                    </a>
+                </div>
+
+                <!-- AI Mode (RECOMMENDED) -->
+                <div class="pricing-card bg-white border-2 border-purple-500 relative" style="transform: scale(1.05);">
+                    <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                        <span class="bg-purple-500 text-white px-4 py-1 rounded-full text-sm font-bold" data-i18n="pricing.ai.badge">🔥 推荐</span>
+                    </div>
+
+                    <div class="text-center mb-6">
+                        <h3 class="text-2xl font-bold mb-2" data-i18n="pricing.ai.title">🤖 AI 智能版</h3>
+                        <div class="text-4xl font-bold text-purple-600 mb-2" data-i18n="pricing.ai.price">¥1.0</div>
+                        <p class="text-gray-600" data-i18n="pricing.ai.desc">按次付费，用完再买</p>
+                    </div>
+
+                    <ul class="space-y-3 mb-8 flex-grow">
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <strong><span data-i18n="pricing.ai.features[0]">AI 智能分段模式</span></strong>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span data-i18n="pricing.ai.features[1]">语义边界自动识别</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span data-i18n="pricing.ai.features[2]">高精度时间戳</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span data-i18n="pricing.ai.features[3]">包含免费版所有功能</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span data-i18n="pricing.ai.features[4]">邮件技术支持</span>
+                        </li>
+                    </ul>
+
+                    <!-- LemonSqueezy Payment Button -->
+                    <!-- 请替换为你的 LemonSqueezy 支付链接 -->
+                    <a href="https://cfcdn.yuanchaofa.com/blog/2025/f061afcf4071bced0a51db2ac0ac2821.jpg" target="_blank" class="btn-primary w-full text-center block">
+                        <span data-i18n="pricing.ai.cta">购买使用额度</span>
+                    </a>
+                </div>
+
+                <!-- Enterprise -->
+                <div class="pricing-card bg-white border-2 border-gray-200 hover-lift">
+                    <div class="text-center mb-6">
+                        <h3 class="text-2xl font-bold mb-2" data-i18n="pricing.enterprise.title">💼 企业版</h3>
+                        <div class="text-3xl font-bold text-gray-800 mb-2" data-i18n="pricing.enterprise.price">定制</div>
+                        <p class="text-gray-600" data-i18n="pricing.enterprise.desc">API + 私有化部署</p>
+                    </div>
+
+                    <ul class="space-y-3 mb-8 flex-grow">
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <strong><span data-i18n="pricing.enterprise.features[0]">RESTful API 接口</span></strong>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span data-i18n="pricing.enterprise.features[1]">私有化部署</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span data-i18n="pricing.enterprise.features[2]">白标服务（OEM）</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span data-i18n="pricing.enterprise.features[3]">专属技术支持</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span data-i18n="pricing.enterprise.features[4]">定制化开发</span>
+                        </li>
+                    </ul>
+
+                    <a href="mailto:bruceyuan123@gmail.com?subject=企业版咨询" class="btn-outline w-full text-center block">
+                        <span data-i18n="pricing.enterprise.cta">联系销售</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="gradient-bg py-20">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 class="text-4xl font-bold text-white mb-6" data-i18n="cta.title">
+                🎬 立即开始制作你的第一个章节进度条
+            </h2>
+            <p class="text-xl text-white opacity-90 mb-8" data-i18n="cta.subtitle">
+                支持 AI 智能分段和固定间隔模式，10 秒极速生成，完全免费试用
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="https://huggingface.co/spaces/bbruceyuan/auto-chapter-bar" target="_blank" class="bg-white text-purple-600 px-8 py-4 rounded-lg text-lg font-bold hover:bg-gray-100 transition-colors inline-flex items-center">
+                    <i class="fas fa-rocket mr-2"></i>
+                    <span data-i18n="hero.try_free">免费试用 Demo</span>
+                </a>
+                <a href="#pricing" class="border-2 border-white text-white px-8 py-4 rounded-lg text-lg font-bold hover:bg-white hover:text-purple-600 transition-colors inline-flex items-center">
+                    <i class="fas fa-credit-card mr-2"></i>
+                    <span data-i18n="cta.buy_credits">购买 AI 额度</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section id="faq" class="py-20 bg-white">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold mb-4" data-i18n="faq.title">❓ 常见问题</h2>
+                <p class="text-xl text-gray-600" data-i18n="faq.subtitle">
+                    了解更多关于 Auto-Chapter-Bar
+                </p>
+            </div>
+
+            <div class="space-y-6">
+                <div class="bg-gray-50 rounded-lg p-6">
+                    <h3 class="text-xl font-bold mb-2" data-i18n="faq.q1.q">什么是章节进度条？</h3>
+                    <p class="text-gray-600" data-i18n="faq.q1.a">
+                        章节进度条是显示在视频顶部的可视化时间轴，标注了视频的不同部分和主题，帮助观众快速了解视频结构并跳转。
+                    </p>
+                </div>
+
+                <div class="bg-gray-50 rounded-lg p-6">
+                    <h3 class="text-xl font-bold mb-2" data-i18n="faq.q2.q">生成的视频如何使用？</h3>
+                    <p class="text-gray-600" data-i18n="faq.q2.a">
+                        生成的 MOV 文件带有透明通道（RGBA），可以直接导入到 PR、剪映、达芬奇等剪辑软件的最上层轨道，自动叠加在原视频上。
+                    </p>
+                </div>
+
+                <div class="bg-gray-50 rounded-lg p-6">
+                    <h3 class="text-xl font-bold mb-2" data-i18n="faq.q3.q">AI 模式和固定间隔有什么区别？</h3>
+                    <p class="text-gray-600" data-i18n="faq.q3.a">
+                        固定间隔按设定的时间（如 60 秒）均匀分段，适合结构均匀的教程。AI 模式通过理解字幕语义，自动识别主题转换点，生成更自然的章节，适合知识类、访谈等内容。
+                    </p>
+                </div>
+
+                <div class="bg-gray-50 rounded-lg p-6">
+                    <h3 class="text-xl font-bold mb-2" data-i18n="faq.q4.q">AI 模式的费用如何计算？</h3>
+                    <p class="text-gray-600" data-i18n="faq.q4.a">AI 模式需要调用 Moonshot AI 接口，成本约 ¥0.05/5 分钟视频。我们采用按次付费模式，¥1.0 起购，用完再买，无订阅压力。</p>
+                </div>
+
+                <div class="bg-gray-50 rounded-lg p-6">
+                    <h3 class="text-xl font-bold mb-2" data-i18n="faq.q5.q">没有 SRT 文件怎么办？</h3>
+                    <p class="text-gray-600" data-i18n="faq.q5.a">
+                        你可以使用剪映、PR 或在线工具（如 Maestra、Happy Scribe）自动生成字幕，然后导出 SRT 文件。也可以用 FFmpeg 从视频中提取字幕流。
+                    </p>
+                </div>
+
+                <div class="bg-gray-50 rounded-lg p-6">
+                    <h3 class="text-xl font-bold mb-2" data-i18n="faq.q6.q">是否支持批量处理？</h3>
+                    <p class="text-gray-600" data-i18n="faq.q6.a">
+                        企业版支持批量 API 接口。个人用户可以使用我们的开源版本编写脚本批量处理。我们也在开发 Web 版的批量功能，敬请期待。
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-2xl font-bold mb-4 gradient-text">🎬 Auto-Chapter-Bar</h3>
+                    <p class="text-gray-400">
+                        AI 驱动的视频章节进度条生成器，10 秒极速生成专业级动画
+                    </p>
+                </div>
+
+                <div>
+                    <h4 class="text-lg font-bold mb-4" data-i18n="footer.product">产品</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="#features" class="hover:text-white transition-colors" data-i18n="footer.features">特性</a></li>
+                        <li><a href="#pricing" class="hover:text-white transition-colors" data-i18n="footer.pricing">定价</a></li>
+                        <li><a href="https://huggingface.co/spaces/bbruceyuan/auto-chapter-bar" target="_blank" class="hover:text-white transition-colors" data-i18n="footer.demo">Demo</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="text-lg font-bold mb-4" data-i18n="footer.developer">开发者</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="https://github.com/bbruceyuan/auto-chapter-bar" target="_blank" class="hover:text-white transition-colors" data-i18n="footer.github">GitHub</a></li>
+                        <li><a href="https://github.com/bbruceyuan/auto-chapter-bar/blob/master/README.md" target="_blank" class="hover:text-white transition-colors" data-i18n="footer.docs">文档</a></li>
+                        <li><a href="https://github.com/bbruceyuan/auto-chapter-bar/issues" target="_blank" class="hover:text-white transition-colors" data-i18n="footer.issues">问题反馈</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="text-lg font-bold mb-4" data-i18n="footer.contact">联系</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="mailto:bruceyuan123@gmail.com" class="hover:text-white transition-colors" data-i18n="footer.email">邮箱</a></li>
+                        <li><a href="https://github.com/bbruceyuan/auto-chapter-bar/discussions" target="_blank" class="hover:text-white transition-colors" data-i18n="footer.community">社区</a></li>
+                        <li><a href="https://twitter.com/bbruceyuan" target="_blank" class="hover:text-white transition-colors" data-i18n="footer.copyright">Twitter @bbruceyuan</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+                <p>&copy; 2024 Auto-Chapter-Bar. Made with ❤️ by <a href="https://github.com/bbruceyuan" target="_blank" class="text-purple-400">Bruce Yuan</a></p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- LemonSqueezy 支付脚本（如果需要） -->
+    <!-- 请替换为你的 LemonSqueezy 商店链接 -->
+    <!--
+    <script src="https://app.lemonsqueezy.com/js/embed.js" defer></script>
+    -->
+
+    <!-- Google Analytics（可选） -->
+    <!-- 请替换为你的 GA ID -->
+    <!--
+    <script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'GA_MEASUREMENT_ID');
+    </script>
+    -->
+
+    <!-- 国际化 (i18n) 脚本 -->
+    <script>
+        // 翻译数据
+        const translations = {
+            zh: {
+                nav: {
+                    features: '特性',
+                    pricing: '定价',
+                    faq: 'FAQ',
+                    try_free: '免费试用',
+                    buy_ai_credits: '购买 AI 额度'
+                },
+                hero: {
+                    title: 'AI 驱动的视频章节进度条生成器',
+                    subtitle: '10 秒自动生成专业级章节进度条动画，提升视频完播率 60%+',
+                    try_free: '免费试用 Demo',
+                    view_pricing: '查看定价',
+                    stats_videos: '已处理视频',
+                    stats_retention: '完播率提升',
+                    stats_rating: '用户评分'
+                },
+                problem: {
+                    title: '🎯 为什么长视频完播率低？',
+                    subtitle: '观众不知道视频结构、无法快速跳转、认知负荷过高',
+                    lost: {
+                        title: '迷失方向',
+                        desc: '不知道视频整体结构，不知道什么时候到重点，容易中途离开'
+                    },
+                    skip: {
+                        title: '无法跳转',
+                        desc: '平台原生章节功能只在播放器内有效，无法嵌入到视频中永久使用'
+                    },
+                    time: {
+                        title: '耗时太长',
+                        desc: '在 PR/剪映/达芬奇中手动制作章节条需要 30-60 分钟'
+                    }
+                },
+                features: {
+                    main_title: '✨ 核心特性',
+                    main_subtitle: '专业级视频章节进度条，一键生成，完美集成',
+                    speed: {
+                        title: '极速生成',
+                        desc: '10-40 秒自动生成，比手动制作快 100 倍。多进程并行处理，充分利用 CPU 性能'
+                    },
+                    ai: {
+                        title: 'AI 智能分段',
+                        desc: '基于 Moonshot AI 理解视频语义，自动识别主题转换点，生成最符合逻辑的章节'
+                    },
+                    quality: {
+                        title: '专业品质',
+                        desc: '透明通道输出（RGBA），动态文字缩放，阴影效果，灰度配色，完美适配各种背景'
+                    },
+                    privacy: {
+                        title: '隐私优先',
+                        desc: '完全本地处理，SRT 字幕文件不上传云端。保护你的内容安全和商业机密'
+                    },
+                    crossplatform: {
+                        title: '跨平台兼容',
+                        desc: '支持 Windows、macOS、Linux。生成的视频兼容所有平台：B站、抖音、小红书、YouTube'
+                    },
+                    modes: {
+                        title: '三种模式',
+                        desc: 'AI 智能模式、自动分段模式、手动配置模式。满足不同场景需求，灵活可控'
+                    }
+                },
+                how_it_works: {
+                    title: '📝 三步完成',
+                    subtitle: '上传 SRT → 生成章节 → 下载视频',
+                    step1: {
+                        title: '上传 SRT 文件',
+                        desc: '从你视频的字幕文件开始，支持标准 SRT 格式'
+                    },
+                    step2: {
+                        title: 'AI 自动生成',
+                        desc: '选择 AI 智能模式或固定间隔，10 秒生成章节列表'
+                    },
+                    step3: {
+                        title: '下载透明视频',
+                        desc: '下载 MOV 格式视频（透明通道），导入剪辑软件即可'
+                    }
+                },
+                demo: {
+                    title: '🎬 实际效果',
+                    subtitle: '看看章节进度条在真实视频中的效果',
+                    placeholder: '点击观看演示视频',
+                    subtitle2: '（请在下方上传你的 SRT 文件，实时体验生成功能）'
+                },
+                use_cases: {
+                    title: '🎯 适用场景',
+                    subtitle: '各种类型的长视频都能受益',
+                    online_course: {
+                        title: '📚 在线课程',
+                        desc: '按知识模块自动分段，帮助学生快速定位重点'
+                    },
+                    live_stream: {
+                        title: '🎥 直播回放',
+                        desc: '固定间隔（5-10 分钟）快速处理长视频'
+                    },
+                    product_review: {
+                        title: '🛍️ 产品评测',
+                        desc: 'AI 智能识别评测环节，精确控制章节'
+                    },
+                    meeting_record: {
+                        title: '🎤 会议录像',
+                        desc: '识别议题转换点，生成会议纪要式章节'
+                    },
+                    game_commentary: {
+                        title: '🎮 游戏解说',
+                        desc: '手动模式精确标记精彩时刻和关卡进度'
+                    },
+                    vlog: {
+                        title: '📺 Vlog/日常',
+                        desc: '固定间隔（3-5 分钟）轻松划分内容段落'
+                    }
+                },
+                pricing: {
+                    title: '💳 简单易懂的定价',
+                    subtitle: '免费试用，按需付费，支持我们做得更好',
+                    free: {
+                        title: '🆓 免费版',
+                        price: '¥0',
+                        desc: '永久免费，无订阅',
+                        features: ['固定间隔分段模式', '手动编辑和验证', '基础视频导出（MOV）'],
+                        non_features: ['AI 智能分段', '优先技术支持'],
+                        cta: '立即试用'
+                    },
+                    ai: {
+                        badge: '🔥 推荐',
+                        title: '🤖 AI 智能版',
+                        price: '¥1.0',
+                        desc: '按次付费，用完再买',
+                        features: ['AI 智能分段模式', '语义边界自动识别', '高精度时间戳', '包含免费版所有功能', '邮件技术支持'],
+                        cta: '购买使用额度'
+                    },
+                    enterprise: {
+                        title: '💼 企业版',
+                        price: '定制',
+                        desc: 'API + 私有化部署',
+                        features: ['RESTful API 接口', '私有化部署', '白标服务（OEM）', '专属技术支持', '定制化开发'],
+                        cta: '联系销售'
+                    }
+                },
+                faq: {
+                    title: '❓ 常见问题',
+                    subtitle: '了解更多关于 Auto-Chapter-Bar',
+                    q1: {
+                        q: '什么是章节进度条？',
+                        a: '章节进度条是显示在视频顶部的可视化时间轴，标注了视频的不同部分和主题，帮助观众快速了解视频结构并跳转。'
+                    },
+                    q2: {
+                        q: '生成的视频如何使用？',
+                        a: '生成的 MOV 文件带有透明通道（RGBA），可以直接导入到 PR、剪映、达芬奇等剪辑软件的最上层轨道，自动叠加在原视频上。'
+                    },
+                    q3: {
+                        q: 'AI 模式和固定间隔有什么区别？',
+                        a: '固定间隔按设定的时间（如 60 秒）均匀分段，适合结构均匀的教程。AI 模式通过理解字幕语义，自动识别主题转换点，生成更自然的章节，适合知识类、访谈等内容。'
+                    },
+                    q4: {
+                        q: 'AI 模式的费用如何计算？',
+                        a: 'AI 模式需要调用 Moonshot AI 接口，成本约 ¥0.05/5 分钟视频。我们采用按次付费模式，¥1.0 起购，用完再买，无订阅压力。'
+                    },
+                    q5: {
+                        q: '没有 SRT 文件怎么办？',
+                        a: '你可以使用剪映、PR 或在线工具（如 Maestra、Happy Scribe）自动生成字幕，然后导出 SRT 文件。也可以用 FFmpeg 从视频中提取字幕流。'
+                    },
+                    q6: {
+                        q: '是否支持批量处理？',
+                        a: '企业版支持批量 API 接口。个人用户可以使用我们的开源版本编写脚本批量处理。我们也在开发 Web 版的批量功能，敬请期待。'
+                    }
+                },
+                cta: {
+                    title: '🎬 立即开始制作你的第一个章节进度条',
+                    subtitle: '支持 AI 智能分段和固定间隔模式，10 秒极速生成，完全免费试用',
+                    try_free: '免费试用 Demo',
+                    buy_credits: '购买 AI 额度'
+                },
+                footer: {
+                    product: '产品',
+                    developer: '开发者',
+                    contact: '联系',
+                    features: '特性',
+                    pricing: '定价',
+                    demo: 'Demo',
+                    github: 'GitHub',
+                    docs: '文档',
+                    issues: '问题反馈',
+                    email: '邮箱',
+                    community: '社区',
+                    copyright: '© 2024 Auto-Chapter-Bar. Made with ❤️ by Bruce Yuan'
+                }
+            },
+            en: {
+                nav: {
+                    features: 'Features',
+                    pricing: 'Pricing',
+                    faq: 'FAQ',
+                    try_free: 'Try Free',
+                    buy_ai_credits: 'Buy AI Credits'
+                },
+                hero: {
+                    title: 'AI-Powered Video Chapter Progress Bar Generator',
+                    subtitle: 'Auto-generate professional chapter progress bars in 10 seconds, boost video completion rate by 60%+',
+                    try_free: 'Try Free Demo',
+                    view_pricing: 'View Pricing',
+                    stats_videos: 'Videos Processed',
+                    stats_retention: 'Completion Rate Boost',
+                    stats_rating: 'User Rating'
+                },
+                problem: {
+                    title: '🎯 Why Long Videos Have Low Completion Rates?',
+                    subtitle: 'Viewers don\'t know video structure, can\'t quickly navigate, and cognitive load is too high',
+                    lost: {
+                        title: 'Lost Orientation',
+                        desc: 'Don\'t know the overall video structure, don\'t know when key points arrive, and tend to leave early'
+                    },
+                    skip: {
+                        title: 'Can\'t Navigate',
+                        desc: 'Native platform chapter features only work within players and cannot be permanently embedded in videos'
+                    },
+                    time: {
+                        title: 'Too Time-Consuming',
+                        desc: 'Manually creating chapter bars in PR/CapCut/DaVinci takes 30-60 minutes'
+                    }
+                },
+                features: {
+                    main_title: '✨ Core Features',
+                    main_subtitle: 'Professional video chapter progress bars, one-click generation, perfect integration',
+                    speed: {
+                        title: 'Lightning Fast',
+                        desc: 'Auto-generate in 10-40 seconds, 100x faster than manual creation. Multi-process parallel processing maximizes CPU performance'
+                    },
+                    ai: {
+                        title: 'AI Smart Segmentation',
+                        desc: 'Based on Moonshot AI to understand video semantics, automatically identify topic transition points, and generate the most logical chapters'
+                    },
+                    quality: {
+                        title: 'Professional Quality',
+                        desc: 'RGBA output with alpha channel, dynamic text scaling, shadow effects, grayscale color scheme, perfectly adapts to any background'
+                    },
+                    privacy: {
+                        title: 'Privacy First',
+                        desc: 'Fully local processing, SRT subtitle files are never uploaded to the cloud. Protect your content security and business confidentiality'
+                    },
+                    crossplatform: {
+                        title: 'Cross-Platform Compatible',
+                        desc: 'Supports Windows, macOS, Linux. Generated videos are compatible with all platforms: Bilibili, Douyin, Xiaohongshu, YouTube'
+                    },
+                    modes: {
+                        title: 'Three Modes',
+                        desc: 'AI smart mode, auto segmentation mode, manual configuration mode. Meet different scenario needs with flexibility and control'
+                    }
+                },
+                how_it_works: {
+                    title: '📝 Three Steps to Complete',
+                    subtitle: 'Upload SRT → Generate Chapters → Download Video',
+                    step1: {
+                        title: 'Upload SRT File',
+                        desc: 'Start with your video subtitle file, supporting standard SRT format'
+                    },
+                    step2: {
+                        title: 'AI Auto Generation',
+                        desc: 'Choose AI smart mode or fixed interval, generate chapter list in 10 seconds'
+                    },
+                    step3: {
+                        title: 'Download Transparent Video',
+                        desc: 'Download MOV format video (with alpha channel) and import into editing software'
+                    }
+                },
+                demo: {
+                    title: '🎬 Actual Effect',
+                    subtitle: 'See how chapter progress bars work in real videos',
+                    placeholder: 'Click to watch demo video',
+                    subtitle2: '(Upload your SRT file below to experience generation in real time)'
+                },
+                use_cases: {
+                    title: '🎯 Use Cases',
+                    subtitle: 'All types of long-form videos can benefit',
+                    online_course: {
+                        title: '📚 Online Courses',
+                        desc: 'Auto segment by knowledge modules, help students quickly locate key points'
+                    },
+                    live_stream: {
+                        title: '🎥 Live Stream Replays',
+                        desc: 'Fixed intervals (5-10 minutes) for quick long video processing'
+                    },
+                    product_review: {
+                        title: '🛍️ Product Reviews',
+                        desc: 'AI intelligently identifies review segments for precise chapter control'
+                    },
+                    meeting_record: {
+                        title: '🎤 Meeting Recordings',
+                        desc: 'Identify topic transition points to generate meeting minute-style chapters'
+                    },
+                    game_commentary: {
+                        title: '🎮 Game Commentary',
+                        desc: 'Manual mode precisely marks exciting moments and level progress'
+                    },
+                    vlog: {
+                        title: '📺 Vlog/Daily Life',
+                        desc: 'Fixed intervals (3-5 minutes) easily divide content sections'
+                    }
+                },
+                pricing: {
+                    title: '💳 Simple and Clear Pricing',
+                    subtitle: 'Try free, pay as you go, support us to do better',
+                    free: {
+                        title: '🆓 Free Version',
+                        price: '¥0',
+                        desc: 'Free forever, no subscription',
+                        features: ['Fixed interval segmentation mode', 'Manual editing and validation', 'Basic video export (MOV)'],
+                        non_features: ['AI smart segmentation', 'Priority technical support'],
+                        cta: 'Try Now'
+                    },
+                    ai: {
+                        badge: '🔥 Recommended',
+                        title: '🤖 AI Smart Version',
+                        price: '¥1.0',
+                        desc: 'Pay per use, buy when you run out',
+                        features: ['AI smart segmentation mode', 'Semantic boundary auto-detection', 'High-precision timestamps', 'Includes all free version features', 'Email technical support'],
+                        cta: 'Buy Credits'
+                    },
+                    enterprise: {
+                        title: '💼 Enterprise',
+                        price: 'Custom',
+                        desc: 'API + Private deployment',
+                        features: ['RESTful API interface', 'Private deployment', 'White-label service (OEM)', 'Dedicated technical support', 'Custom development'],
+                        cta: 'Contact Sales'
+                    }
+                },
+                faq: {
+                    title: '❓ Frequently Asked Questions',
+                    subtitle: 'Learn more about Auto-Chapter-Bar',
+                    q1: {
+                        q: 'What is a chapter progress bar?',
+                        a: 'A chapter progress bar is a visual timeline displayed at the top of a video, marking different sections and topics to help viewers quickly understand video structure and navigate.'
+                    },
+                    q2: {
+                        q: 'How to use the generated video?',
+                        a: 'The generated MOV file has an alpha channel (RGBA) and can be directly imported to the top video track in PR, CapCut, DaVinci and other editing software, automatically overlaying on the original video.'
+                    },
+                    q3: {
+                        q: 'What is the difference between AI mode and fixed interval?',
+                        a: 'Fixed interval uniformly segments at set times (e.g., 60 seconds), suitable for tutorials with uniform structure. AI mode understands subtitle semantics to automatically identify topic transition points, generating more natural chapters for knowledge-based, interview content.'
+                    },
+                    q4: {
+                        q: 'How is AI mode cost calculated?',
+                        a: 'AI mode requires calling Moonshot AI interface, costing about ¥0.05/5-minute video. We use a pay-per-use model, starting at ¥1.0, buy when you run out, no subscription pressure.'
+                    },
+                    q5: {
+                        q: 'What if I don\'t have an SRT file?',
+                        a: 'You can use CapCut, PR or online tools (like Maestra, Happy Scribe) to auto-generate subtitles, then export SRT files. You can also use FFmpeg to extract subtitle streams from videos.'
+                    },
+                    q6: {
+                        q: 'Does it support batch processing?',
+                        a: 'Enterprise version supports batch API interface. Individual users can use our open-source version to write scripts for batch processing. We are also developing Web-based batch features, stay tuned.'
+                    }
+                },
+                cta: {
+                    title: '🎬 Start Creating Your First Chapter Progress Bar Now',
+                    subtitle: 'Supports AI smart segmentation and fixed interval modes, 10-second ultra-fast generation, completely free to try',
+                    try_free: 'Try Free Demo',
+                    buy_credits: 'Buy AI Credits'
+                },
+                footer: {
+                    product: 'Product',
+                    developer: 'Developer',
+                    contact: 'Contact',
+                    features: 'Features',
+                    pricing: 'Pricing',
+                    demo: 'Demo',
+                    github: 'GitHub',
+                    docs: 'Documentation',
+                    issues: 'Bug Reports',
+                    email: 'Email',
+                    community: 'Community',
+                    copyright: '© 2024 Auto-Chapter-Bar. Made with ❤️ by Bruce Yuan'
+                }
+            }
+        };
+
+        // 当前语言
+        let currentLang = 'zh';
+
+        // 初始化语言
+        function initLanguage() {
+            // 从 URL 参数获取语言
+            const urlParams = new URLSearchParams(window.location.search);
+            const langFromUrl = urlParams.get('lang');
+
+            // 从 localStorage 获取语言
+            const langFromStorage = localStorage.getItem('preferred-language');
+
+            // 决定使用哪种语言
+            if (langFromUrl && (langFromUrl === 'zh' || langFromUrl === 'en')) {
+                currentLang = langFromUrl;
+            } else if (langFromStorage && (langFromStorage === 'zh' || langFromStorage === 'en')) {
+                currentLang = langFromStorage;
+            } else {
+                // 检测浏览器语言
+                const browserLang = navigator.language || navigator.userLanguage;
+                if (browserLang && browserLang.toLowerCase().startsWith('en')) {
+                    currentLang = 'en';
+                } else {
+                    currentLang = 'zh';
+                }
+            }
+
+            // 更新页面语言
+            updatePageLanguage();
+        }
+
+        // 切换语言
+        function switchLanguage() {
+            currentLang = currentLang === 'zh' ? 'en' : 'zh';
+
+            // 保存到 localStorage
+            localStorage.setItem('preferred-language', currentLang);
+
+            // 更新 URL 参数
+            const url = new URL(window.location.href);
+            url.searchParams.set('lang', currentLang);
+            window.history.replaceState({}, '', url);
+
+            // 更新页面
+            updatePageLanguage();
+        }
+
+        // 更新页面语言
+        function updatePageLanguage() {
+            // 更新按钮文本
+            const langText = document.getElementById('lang-text');
+            if (langText) {
+                langText.textContent = currentLang === 'zh' ? 'EN' : '中文';
+            }
+
+            // 更新所有带有 data-i18n 属性的元素
+            document.querySelectorAll('[data-i18n]').forEach(element => {
+                const key = element.getAttribute('data-i18n');
+                const translation = getNestedTranslation(translations[currentLang], key);
+
+                if (translation) {
+                    // 如果元素有子元素（如图标），只更新文本节点
+                    const textNodes = Array.from(element.childNodes).filter(node =>
+                        node.nodeType === Node.TEXT_NODE && node.textContent.trim()
+                    );
+
+                    if (textNodes.length > 0) {
+                        // 更新第一个包含文本的文本节点
+                        textNodes[0].textContent = translation;
+                    } else {
+                        // 如果没有文本节点，直接设置内容
+                        element.textContent = translation;
+                    }
+                }
+            });
+
+            // 更新页面标题和语言属性
+            document.documentElement.lang = currentLang === 'zh' ? 'zh-CN' : 'en';
+
+            // 更新 meta 标签（如果需要）
+            updateMetaTags();
+        }
+
+        // 获取嵌套的翻译值
+        function getNestedTranslation(obj, key) {
+            return key.split('.').reduce((current, keyPart) => {
+                if (!current) return null;
+
+                // 处理数组索引，如 features[0]
+                const arrayMatch = keyPart.match(/^(\w+)\[(\d+)\]$/);
+                if (arrayMatch) {
+                    const arrayName = arrayMatch[1];
+                    const index = parseInt(arrayMatch[2]);
+                    return current[arrayName] && current[arrayName][index] !== undefined
+                        ? current[arrayName][index]
+                        : null;
+                }
+
+                // 普通对象属性
+                return current[keyPart] !== undefined ? current[keyPart] : null;
+            }, obj);
+        }
+
+        // 更新 meta 标签
+        function updateMetaTags() {
+            const metaDescription = document.querySelector('meta[name="description"]');
+            if (metaDescription && translations[currentLang].hero && translations[currentLang].hero.subtitle) {
+                metaDescription.setAttribute('content', translations[currentLang].hero.subtitle);
+            }
+
+            // 更新页面标题
+            if (translations[currentLang].hero && translations[currentLang].hero.title) {
+                document.title = `Auto-Chapter-Bar - ${translations[currentLang].hero.title}`;
+            }
+        }
+
+        // 页面加载时初始化语言
+        document.addEventListener('DOMContentLoaded', initLanguage);
+
+        // 导出函数到全局作用域，供按钮调用
+        window.switchLanguage = switchLanguage;
+    </script>
+</body>
+</html>

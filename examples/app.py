@@ -240,16 +240,17 @@ def create_interface():
 
         gr.Markdown(
             """
-            # 🎬 Auto-Chapter-Bar v2
+            # 🎬 [Auto-Chapter-Bar](https://github.com/bbruceyuan/auto-chapter-bar)
             ### 将 SRT 字幕文件转换为可叠加的视频章节进度条动画
 
             **使用说明**：上传 SRT 文件 → 设置参数 → 点击生成 → 下载透明视频
 
             **特性**:
-            • AI 智能分段（需要 Moonshot API Key）
-            • 固定间隔分段（免费）
-            • 透明通道输出（直接叠加到原视频）
-            • 支持中文字幕
+
+            * AI 智能分段（需要 Moonshot API Key）
+            * 固定间隔分段（免费）
+            * 透明通道输出（直接叠加到原视频）
+            * 支持中文字幕
             """
         )
 
@@ -353,12 +354,10 @@ def create_interface():
             3. 将章节条拖到最上层轨道
             4. 导出最终视频
 
-            **查看使用教程**: [docs/USAGE.md](docs/USAGE.md)
-
-            **GitHub 仓库**: [https://github.com/yourusername/auto-chapter-bar](https://github.com/yourusername/auto-chapter-bar)
+            **GitHub 仓库**: [https://github.com/bbruceyuan/auto-chapter-bar](https://github.com/bbruceyuan/auto-chapter-bar)
 
             ---
-            Made with ❤️ by Auto-Chapter-Bar Team
+            Made with ❤️ by [Chaofa Yuan](https://yuanchaofa.com)
             """
         )
 
@@ -403,4 +402,4 @@ def create_interface():
 
 if __name__ == "__main__":
     app = create_interface()
-    app.launch(server_name="0.0.0.0", server_port=7860, share=False, debug=True)
+    app.launch()
