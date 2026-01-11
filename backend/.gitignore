@@ -32,7 +32,11 @@ htmlcov/
 
 # Secrets - NEVER commit these
 .env
-.env.*
+.env.local
+.env.*.local
 *.key
 credentials.json
 secrets.yaml
+
+# Allow .env.example (配置模板)
+!.env.example
