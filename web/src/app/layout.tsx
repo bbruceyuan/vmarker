@@ -1,5 +1,5 @@
 /**
- * [INPUT]: 依赖 next/font/google, globals.css, Header, Footer
+ * [INPUT]: 依赖 next/font/google, globals.css, Header, Footer, AuthProvider
  * [OUTPUT]: 对外提供 RootLayout, metadata
  * [POS]: App Router 根布局，定义字体和全局结构
  * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
@@ -10,6 +10,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { AuthProvider } from "@/contexts/AuthContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -36,9 +37,11 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}
       >
-        <Header />
-        <main className="flex-1">{children}</main>
-        <Footer />
+        <AuthProvider>
+          <Header />
+          <main className="flex-1">{children}</main>
+          <Footer />
+        </AuthProvider>
       </body>
     </html>
   );
