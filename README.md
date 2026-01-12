@@ -363,6 +363,18 @@ ASR_API_BASE=https://api.openai.com/v1
 ASR_MODEL=whisper-1
 ```
 
+Supabase 登录需要配置后端 JWT 和前端环境变量：
+
+```env
+# backend/.env
+SUPABASE_JWT_SECRET=your-jwt-secret-here
+SUPABASE_URL=https://xxx.supabase.co
+
+# web/.env.local
+NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+```
+
 ### 测试
 
 ```bash
