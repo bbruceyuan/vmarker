@@ -90,7 +90,6 @@ class VideoEncoder:
         progress_callback: ProgressCallback | None = None,
         format: str = "webm",
         key_frame_interval: float | None = None,
-        interpolate: bool = True,
     ) -> Path:
         """
         编码视频
@@ -102,7 +101,6 @@ class VideoEncoder:
             progress_callback: 进度回调
             format: 输出格式 ("webm" 或 "mov")
             key_frame_interval: 关键帧间隔（秒），设置后只渲染关键帧并用 FFmpeg 补帧
-            interpolate: 是否使用 FFmpeg 插值补帧（仅在 key_frame_interval 生效）
 
         Returns:
             输出文件路径
@@ -125,9 +123,6 @@ class VideoEncoder:
                     keyframe_idx += 1
 
                 filter_chain = f"fps={self.fps}"
-                if interpolate:
-                    filter_chain += ",minterpolate=mi_mode=mci:mc_mode=aobmc:vsbmc=1"
-
                 input_fps = self.fps / frame_step
                 self._ffmpeg_encode(
                     tmpdir,

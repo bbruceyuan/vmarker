@@ -87,7 +87,6 @@ def generate(
     progress_callback: ProgressCallback | None = None,
     format: str = "mp4",
     key_frame_interval: float | None = None,
-    interpolate: bool = True,
 ) -> Path:
     """
     生成进度条视频
@@ -98,7 +97,6 @@ def generate(
         progress_callback: 进度回调
         format: 输出格式（mp4/mov）
         key_frame_interval: 关键帧间隔（秒），设置后只渲染关键帧并用 FFmpeg 补帧
-        interpolate: 是否使用 FFmpeg 插值补帧（仅在 key_frame_interval 生效）
 
     Returns:
         输出文件路径
@@ -125,7 +123,6 @@ def generate(
         progress_callback=internal_callback,
         format=format,
         key_frame_interval=key_frame_interval,
-        interpolate=interpolate,
     )
 
     if progress_callback:

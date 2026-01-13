@@ -37,7 +37,6 @@ class GenerateRequest(BaseModel):
     unplayed_color: str = Field("#64748B", description="未播放颜色")
     format: str = Field("mp4", description="输出格式（mp4/mov）")
     key_frame_interval: float | None = Field(None, gt=0, description="关键帧间隔（秒）")
-    interpolate: bool = Field(True, description="是否使用插值补帧")
 
 
 # =============================================================================
@@ -100,7 +99,6 @@ async def generate_progress_bar(request: GenerateRequest):
                 output,
                 format=request.format,
                 key_frame_interval=request.key_frame_interval,
-                interpolate=request.interpolate,
             )
         except RuntimeError as e:
             raise HTTPException(500, f"生成失败: {e}")

@@ -73,7 +73,6 @@ def _run_chapter_bar(
     width: int,
     height: int,
     key_frame_interval: Optional[float],
-    interpolate: bool,
     api_key: Optional[str],
     api_base: str,
     model: str,
@@ -169,7 +168,6 @@ def _run_chapter_bar(
                 output,
                 progress_callback=on_progress,
                 key_frame_interval=key_frame_interval,
-                interpolate=interpolate,
             )
         except RuntimeError as e:
             console.print(f"\n[red]生成失败: {e}[/red]")
@@ -203,10 +201,6 @@ def acb_main(
         Optional[float],
         typer.Option("--key-frame-interval", min=0.05, help="关键帧间隔(秒)"),
     ] = None,
-    interpolate: Annotated[
-        bool,
-        typer.Option("--interpolate/--no-interpolate", help="是否启用 FFmpeg 插值补帧"),
-    ] = True,
     api_key: Annotated[Optional[str], typer.Option("--api-key", envvar="API_KEY")] = None,
     api_base: Annotated[
         str, typer.Option("--api-base", envvar="API_BASE")
@@ -223,7 +217,6 @@ def acb_main(
         width,
         height,
         key_frame_interval,
-        interpolate,
         api_key,
         api_base,
         model,
@@ -267,10 +260,6 @@ def cmd_chapter(
         Optional[float],
         typer.Option("--key-frame-interval", min=0.05, help="关键帧间隔(秒)"),
     ] = None,
-    interpolate: Annotated[
-        bool,
-        typer.Option("--interpolate/--no-interpolate", help="是否启用 FFmpeg 插值补帧"),
-    ] = True,
     api_key: Annotated[Optional[str], typer.Option("--api-key", envvar="API_KEY")] = None,
     api_base: Annotated[
         str, typer.Option("--api-base", envvar="API_BASE")
@@ -287,7 +276,6 @@ def cmd_chapter(
         width,
         height,
         key_frame_interval,
-        interpolate,
         api_key,
         api_base,
         model,

@@ -74,7 +74,6 @@ class ComposeRequest(BaseModel):
     progress_height: int = 8
     # 性能优化
     key_frame_interval: float | None = None
-    interpolate: bool = True
 
 
 # =============================================================================
@@ -293,7 +292,6 @@ def _generate_chapter_bar(session: TempSession, source_info: video_probe.VideoIn
         format="mp4",
         scheme=scheme,
         key_frame_interval=request.key_frame_interval,
-        interpolate=request.interpolate,
     )
 
     return bar_path
@@ -315,7 +313,6 @@ def _generate_progress_bar(session: TempSession, source_info: video_probe.VideoI
         bar_path,
         format="mp4",
         key_frame_interval=request.key_frame_interval,
-        interpolate=request.interpolate,
     )
 
     return bar_path
