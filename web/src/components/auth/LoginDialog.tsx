@@ -11,6 +11,7 @@ import { useState } from "react";
 import { Github, Mail, Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Dialog,
   DialogContent,
@@ -26,8 +27,9 @@ interface LoginDialogProps {
 }
 
 export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
-  const { signInWithOAuth } = useAuth();
+  const { signInWithOAuth, signIn } = useAuth();
   const [isLoading, setIsLoading] = useState<string | null>(null);
+  const [email, setEmail] = useState("");
 
   async function handleOAuthLogin(provider: "github" | "google") {
     try {
@@ -36,6 +38,24 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
     } catch (error) {
       console.error("Login error:", error);
       toast.error("登录失败，请稍后重试");
+      setIsLoading(null);
+    }
+  }
+
+  async function handleEmailLogin() {
+    if (!email.trim()) {
+      toast.error("请输入邮箱地址");
+      return;
+    }
+
+    try {
+      setIsLoading("email");
+      await signIn(email.trim());
+      toast.success("登录链接已发送，请查收邮箱");
+    } catch (error) {
+      console.error("Login error:", error);
+      toast.error("发送失败，请稍后重试");
+    } finally {
       setIsLoading(null);
     }
   }
@@ -51,6 +71,29 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
         </DialogHeader>
 
         <div className="flex flex-col gap-3 mt-4">
+          {/* 邮箱魔法链接 */}
+          <div className="flex flex-col gap-2">
+            <Input
+              type="email"
+              placeholder="邮箱地址"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              autoComplete="email"
+              disabled={isLoading !== null}
+            />
+            <Button
+              className="w-full h-11"
+              onClick={handleEmailLogin}
+              disabled={isLoading !== null}
+            >
+              {isLoading === "email" ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                "发送登录链接"
+              )}
+            </Button>
+          </div>
+
           {/* GitHub 登录 */}
           <Button
             variant="outline"
