@@ -7,11 +7,11 @@
 
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
-export default function AuthCallbackPage() {
+function AuthCallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const code = searchParams.get("code");
@@ -47,5 +47,17 @@ export default function AuthCallbackPage() {
     <div className="flex min-h-screen items-center justify-center">
       <p className="text-sm text-muted-foreground">正在登录...</p>
     </div>
+  );
+}
+
+export default function AuthCallbackPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-screen items-center justify-center">
+        <p className="text-sm text-muted-foreground">加载中...</p>
+      </div>
+    }>
+      <AuthCallbackContent />
+    </Suspense>
   );
 }
