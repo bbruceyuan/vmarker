@@ -1,9 +1,11 @@
 /**
- * [INPUT]: 无外部依赖
+ * [INPUT]: 依赖 @/lib/supabase
  * [OUTPUT]: 对外提供 API 客户端和类型定义
  * [POS]: lib 模块的 API 层，封装后端调用
  * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
  */
+
+import { supabase } from "./supabase";
 
 // ============================================================
 // 配置
@@ -88,6 +90,29 @@ async function handleResponse<T>(response: Response): Promise<T> {
     throw new ApiError(response.status, text || response.statusText);
   }
   return response.json();
+}
+
+/** 带认证的 fetch，自动注入 Bearer Token */
+async function authFetch(
+  url: string,
+  options?: RequestInit
+): Promise<Response> {
+  // 获取当前 session
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  const headers = {
+    ...options?.headers,
+    ...(session?.access_token
+      ? { Authorization: `Bearer ${session.access_token}` }
+      : {}),
+  };
+
+  return fetch(url, {
+    ...options,
+    headers,
+  });
 }
 
 // ============================================================
@@ -475,5 +500,41 @@ export const youtubeApi = {
       body: JSON.stringify({ url }),
     });
     return handleResponse<YouTubeChaptersResult>(res);
+  },
+};
+
+// ============================================================
+// Auth 类型定义
+// ============================================================
+
+/** 用户信息 */
+export interface AuthUser {
+  id: string;
+  email?: string;
+  role: string;
+  aud: string;
+}
+
+/** 认证检查响应 */
+export interface AuthCheckResponse {
+  authenticated: boolean;
+  user?: AuthUser | null;
+}
+
+// ============================================================
+// Auth API
+// ============================================================
+
+export const authApi = {
+  /** 获取当前用户信息（需要认证） */
+  async getMe(): Promise<AuthUser> {
+    const res = await authFetch(`${API_BASE}/api/v1/auth/me`);
+    return handleResponse<AuthUser>(res);
+  },
+
+  /** 检查认证状态（可选认证） */
+  async check(): Promise<AuthCheckResponse> {
+    const res = await authFetch(`${API_BASE}/api/v1/auth/check`);
+    return handleResponse<AuthCheckResponse>(res);
   },
 };

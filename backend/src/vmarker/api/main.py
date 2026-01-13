@@ -13,9 +13,6 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-from vmarker import __version__
-from vmarker.api.routes import chapter_bar, progress_bar, shownotes, subtitle, video, youtube
-
 
 # =============================================================================
 #  加载环境变量
@@ -24,6 +21,9 @@ from vmarker.api.routes import chapter_bar, progress_bar, shownotes, subtitle, v
 # 从 backend/.env 加载
 _env_path = Path(__file__).parent.parent.parent.parent / ".env"
 load_dotenv(_env_path)
+
+from vmarker import __version__
+from vmarker.api.routes import auth, chapter_bar, progress_bar, shownotes, subtitle, video, youtube
 
 
 # =============================================================================
@@ -84,6 +84,7 @@ async def health():
 #  注册功能路由
 # =============================================================================
 
+app.include_router(auth.router, prefix="/api/v1/auth", tags=["Auth"])
 app.include_router(chapter_bar.router, prefix="/api/v1/chapter-bar", tags=["Chapter Bar"])
 app.include_router(shownotes.router, prefix="/api/v1/shownotes", tags=["Show Notes"])
 app.include_router(subtitle.router, prefix="/api/v1/subtitle", tags=["Subtitle"])

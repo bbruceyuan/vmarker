@@ -24,6 +24,7 @@ dependencies = [
     "python-dotenv>=1.0.0",
     "yt-dlp>=2024.0.0",
     "youtube-transcript-api>=0.6.0",
+    "python-jose[cryptography]>=3.3.0",
 ]
 
 [dependency-groups]

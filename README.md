@@ -363,6 +363,43 @@ ASR_API_BASE=https://api.openai.com/v1
 ASR_MODEL=whisper-1
 ```
 
+Supabase 登录需要配置后端 JWT 和前端环境变量：
+
+```env
+# backend/.env
+SUPABASE_JWT_SECRET=your-jwt-secret-here
+SUPABASE_URL=https://xxx.supabase.co
+
+# web/.env.local
+NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+```
+
+### `.env` / `.env.local` 配置流程
+
+1. 在 Supabase 控制台获取参数：
+   - Project Settings → API → Project URL → 填到 `SUPABASE_URL` 和 `NEXT_PUBLIC_SUPABASE_URL`
+   - Project Settings → API → API Keys → **anon/public** key → 填到 `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   - Project Settings → JWT Keys → **Legacy JWT Secret** → 填到 `SUPABASE_JWT_SECRET`
+
+2. 在 `backend/.env` 写入（示例）：
+   ```env
+   SUPABASE_JWT_SECRET=your-jwt-secret-here
+   SUPABASE_URL=https://xxx.supabase.co
+   ```
+
+3. 在 `web/.env.local` 写入（示例）：
+   ```env
+   # 后端 API 地址
+   NEXT_PUBLIC_API_URL=http://localhost:8000
+   NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+   ```
+
+4. 重启前后端进程使环境变量生效。
+
+> 注意：`SUPABASE_JWT_SECRET` 仅用于后端验证 JWT。当前后端使用 HS256（Legacy JWT Secret）；如果项目已切换到新的 JWT Signing Keys（P-256），需要先改后端验签方式。
+
 ### 测试
 
 ```bash
