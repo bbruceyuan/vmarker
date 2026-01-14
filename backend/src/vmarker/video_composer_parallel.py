@@ -58,6 +58,13 @@ class ParallelConfig:
     max_workers: int = DEFAULT_MAX_WORKERS
     gop_multiplier: int = 2  # GOP = fps * gop_multiplier
 
+    def __post_init__(self):
+        """验证配置参数"""
+        if self.chunk_seconds <= 0:
+            raise ValueError(f"chunk_seconds must be positive, got {self.chunk_seconds}")
+        if self.max_workers <= 0:
+            raise ValueError(f"max_workers must be positive, got {self.max_workers}")
+
 
 @dataclass
 class JobProgress:
@@ -86,7 +93,13 @@ def calculate_segments(duration: float, chunk_seconds: int) -> list[Segment]:
 
     Returns:
         Segment 列表
+
+    Raises:
+        ValueError: chunk_seconds <= 0
     """
+    if chunk_seconds <= 0:
+        raise ValueError(f"chunk_seconds must be positive, got {chunk_seconds}")
+
     segments: list[Segment] = []
     index = 0
     start = 0.0
