@@ -30,6 +30,7 @@ router = APIRouter()
 
 MAX_FILE_SIZE = 500 * 1024 * 1024  # 500MB
 MAX_DURATION = 300  # 5 分钟
+PARALLEL_THRESHOLD_SECONDS = 180  # 超过 3 分钟自动使用并行合成
 ALLOWED_EXTENSIONS = {".mp4", ".mov", ".webm", ".mkv", ".avi"}
 
 
@@ -230,6 +231,7 @@ async def compose_video(session_id: str, request: ComposeRequest):
     将 Bar 合成到原视频
 
     支持 Chapter Bar 和 Progress Bar 两种合成。
+    视频超过 3 分钟自动使用并行合成提升速度。
     """
     # 获取会话
     session = get_session(session_id)
@@ -258,14 +260,32 @@ async def compose_video(session_id: str, request: ComposeRequest):
     else:
         raise HTTPException(400, f"不支持的功能: {request.feature}")
 
-    # 合成视频
+    # 合成视频 - 自动选择串行或并行
     output_path = session.get_path("output.mp4")
-    compose_config = video_composer.CompositionConfig(position=position)
 
-    try:
-        video_composer.compose_vstack(source_video, bar_path, output_path, compose_config)
-    except RuntimeError as e:
-        raise HTTPException(500, f"视频合成失败: {e}")
+    # 视频超过阈值时自动使用并行合成
+    use_parallel = source_info.duration > PARALLEL_THRESHOLD_SECONDS
+
+    if use_parallel:
+        # 并行合成：根据时长动态计算分片大小（目标 3-4 个分片）
+        chunk_seconds = max(60, int(source_info.duration / 3))
+        parallel_config = video_composer_parallel.ParallelConfig(
+            position=position,
+            chunk_seconds=chunk_seconds,
+        )
+        try:
+            await video_composer_parallel.compose_vstack_parallel(
+                source_video, bar_path, output_path, parallel_config
+            )
+        except RuntimeError as e:
+            raise HTTPException(500, f"视频合成失败: {e}")
+    else:
+        # 串行合成
+        compose_config = video_composer.CompositionConfig(position=position)
+        try:
+            video_composer.compose_vstack(source_video, bar_path, output_path, compose_config)
+        except RuntimeError as e:
+            raise HTTPException(500, f"视频合成失败: {e}")
 
     # 返回合成后的视频
     content = output_path.read_bytes()
