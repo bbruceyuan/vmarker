@@ -11,7 +11,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 from fastapi.responses import Response
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 
 from vmarker import asr, chapter_bar as cb, progress_bar as pb, video_composer, video_composer_parallel, video_probe
 from vmarker.models import Chapter, ChapterBarConfig, ColorScheme, VideoConfig
@@ -94,6 +94,22 @@ class ComposeParallelRequest(BaseModel):
     # 并行配置
     chunk_seconds: int | None = None  # 分片时长（秒），默认使用环境变量
     max_workers: int | None = None  # 并发上限，默认使用环境变量
+
+    @field_validator("chunk_seconds")
+    @classmethod
+    def validate_chunk_seconds(cls, v: int | None) -> int | None:
+        """验证分片时长"""
+        if v is not None and v <= 0:
+            raise ValueError("chunk_seconds must be positive")
+        return v
+
+    @field_validator("max_workers")
+    @classmethod
+    def validate_max_workers(cls, v: int | None) -> int | None:
+        """验证并发上限"""
+        if v is not None and v <= 0:
+            raise ValueError("max_workers must be positive")
+        return v
 
 
 # =============================================================================

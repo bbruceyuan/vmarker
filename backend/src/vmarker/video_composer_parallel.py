@@ -18,12 +18,36 @@ from vmarker.video_composer import OverlayPosition
 
 
 # =============================================================================
+#  辅助函数
+# =============================================================================
+
+
+def _parse_int_env(key: str, default: int) -> int:
+    """
+    安全解析整数环境变量
+
+    Args:
+        key: 环境变量名
+        default: 默认值
+
+    Returns:
+        解析后的整数值
+    """
+    value = os.getenv(key)
+    if value is None:
+        return default
+    try:
+        return int(value)
+    except ValueError:
+        return default
+
+
+# =============================================================================
 #  环境变量配置
 # =============================================================================
 
-DEFAULT_CHUNK_SECONDS = int(os.getenv("COMPOSE_CHUNK_SECONDS", "300"))  # 默认 5 分钟
-DEFAULT_MAX_WORKERS = int(os.getenv("COMPOSE_MAX_WORKERS", "2"))  # 并发上限
-DEFAULT_MAX_ACTIVE_JOBS = int(os.getenv("COMPOSE_MAX_ACTIVE_JOBS", "2"))  # 最大活动任务数
+DEFAULT_CHUNK_SECONDS = _parse_int_env("COMPOSE_CHUNK_SECONDS", 300)  # 默认 5 分钟
+DEFAULT_MAX_WORKERS = _parse_int_env("COMPOSE_MAX_WORKERS", 2)  # 并发上限
 
 
 # =============================================================================
@@ -57,13 +81,6 @@ class ParallelConfig:
     chunk_seconds: int = DEFAULT_CHUNK_SECONDS
     max_workers: int = DEFAULT_MAX_WORKERS
     gop_multiplier: int = 2  # GOP = fps * gop_multiplier
-
-    def __post_init__(self):
-        """验证配置参数"""
-        if self.chunk_seconds <= 0:
-            raise ValueError(f"chunk_seconds must be positive, got {self.chunk_seconds}")
-        if self.max_workers <= 0:
-            raise ValueError(f"max_workers must be positive, got {self.max_workers}")
 
 
 @dataclass

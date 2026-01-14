@@ -68,15 +68,17 @@ class TestParallelConfig:
         assert config.max_workers > 0
         assert config.gop_multiplier == 2
 
-    def test_invalid_chunk_seconds_raises(self):
-        """无效 chunk_seconds 应抛出 ValueError"""
-        with pytest.raises(ValueError, match="chunk_seconds must be positive"):
-            ParallelConfig(chunk_seconds=0)
+    def test_chunk_seconds_zero_no_error(self):
+        """chunk_seconds=0 不再在 Config 层验证（API 层验证）"""
+        # Config 层不再抛出异常，验证移到 API 层
+        config = ParallelConfig(chunk_seconds=0)
+        assert config.chunk_seconds == 0
 
-    def test_invalid_max_workers_raises(self):
-        """无效 max_workers 应抛出 ValueError"""
-        with pytest.raises(ValueError, match="max_workers must be positive"):
-            ParallelConfig(max_workers=0)
+    def test_max_workers_zero_no_error(self):
+        """max_workers=0 不再在 Config 层验证（API 层验证）"""
+        # Config 层不再抛出异常，验证移到 API 层
+        config = ParallelConfig(max_workers=0)
+        assert config.max_workers == 0
 
 
 class TestCleanupSegments:
