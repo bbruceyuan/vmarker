@@ -219,6 +219,7 @@ npm run dev
 
 访问 **http://localhost:3000**
 
+
 ---
 
 ### 方式二：CLI 命令行
@@ -241,6 +242,24 @@ uv run vmarker shownotes input.srt
 uv run vmarker subtitle input.srt
 uv run vmarker themes  # 列出配色方案
 ```
+
+---
+
+### 方式三：Docker
+
+```bash
+docker compose up --build
+```
+
+打开 **http://localhost:3000**。
+
+**环境变量说明（最简）**：
+- 后端读取 `backend/.env`（需要 `API_KEY` 才能使用 AI 分段）。
+- 前端读取 `web/.env.local`，其中 `NEXT_PUBLIC_API_URL` 必须是浏览器可访问的地址，**本机就是 `http://localhost:8000`**。
+
+改完 `web/.env.local` 后需要重新构建前端镜像：  
+`docker compose build vmarker-web`
+
 
 #### 安装模式（全局使用）
 
