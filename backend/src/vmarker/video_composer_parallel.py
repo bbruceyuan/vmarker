@@ -50,7 +50,10 @@ def _parse_int_env(key: str, default: int) -> int:
 # =============================================================================
 
 DEFAULT_CHUNK_SECONDS = _parse_int_env("COMPOSE_CHUNK_SECONDS", 300)  # 默认 5 分钟
-DEFAULT_MAX_WORKERS = _parse_int_env("COMPOSE_MAX_WORKERS", 2)  # 并发上限
+DEFAULT_MAX_WORKERS = _parse_int_env("COMPOSE_MAX_WORKERS", 2)  # 分片并发上限
+DEFAULT_MAX_ACTIVE_JOBS = _parse_int_env("COMPOSE_MAX_ACTIVE_JOBS", 2)  # 全局并发上限
+
+_ACTIVE_JOB_SEMAPHORE = asyncio.Semaphore(DEFAULT_MAX_ACTIVE_JOBS)
 
 
 # =============================================================================
@@ -84,6 +87,12 @@ class ParallelConfig:
     chunk_seconds: int = DEFAULT_CHUNK_SECONDS
     max_workers: int = DEFAULT_MAX_WORKERS
     gop_multiplier: int = 2  # GOP = fps * gop_multiplier
+
+    def __post_init__(self):
+        if self.chunk_seconds <= 0:
+            raise ValueError(f"chunk_seconds must be positive, got {self.chunk_seconds}")
+        if self.max_workers <= 0:
+            raise ValueError(f"max_workers must be positive, got {self.max_workers}")
 
 
 @dataclass
@@ -393,44 +402,45 @@ async def compose_vstack_parallel(
         raise FileNotFoundError(f"Bar 视频不存在: {bar_video}")
 
     config = config or ParallelConfig()
-    source_info = probe(source_video)
+    async with _ACTIVE_JOB_SEMAPHORE:
+        source_info = probe(source_video)
+        if source_info.duration <= 0:
+            raise RuntimeError(f"无效视频时长: {source_info.duration}")
 
-    # 1. 计算分片
-    segments = calculate_segments(source_info.duration, config.chunk_seconds)
+        # 1. 计算分片
+        segments = calculate_segments(source_info.duration, config.chunk_seconds)
 
-    # 如果只有一个分片，直接使用原有串行逻辑
-    if len(segments) == 1:
-        from vmarker.video_composer import compose_vstack, CompositionConfig
-        serial_config = CompositionConfig(position=config.position)
-        return compose_vstack(source_video, bar_video, output_path, serial_config)
+        # 如果只有一个分片，直接使用原有串行逻辑
+        if len(segments) == 1:
+            from vmarker.video_composer import compose_vstack, CompositionConfig
+            serial_config = CompositionConfig(position=config.position)
+            return compose_vstack(source_video, bar_video, output_path, serial_config)
 
-    # 用于追踪需要清理的分片文件
-    segment_outputs: list[Path] = []
-    output_dir = output_path.parent
-    concat_file = output_dir / "segments.txt"
+        # 用于追踪需要清理的分片文件
+        segment_outputs: list[Path] = []
+        output_dir = output_path.parent
+        concat_file = output_dir / "segments.txt"
 
-    try:
-        # 2. 并行合成分片
-        segment_outputs = await compose_segments_parallel(
-            source_video, bar_video, segments, output_dir, config, source_info
-        )
-
-        if len(segment_outputs) != len(segments):
-            raise RuntimeError(f"部分分片合成失败: {len(segment_outputs)}/{len(segments)} 成功")
-
-        # 3. 拼接分片
-        await concat_segments(segment_outputs, output_path, reencode=False)
-
-        return output_path
-    finally:
-        # 4. 无论成功失败都清理临时分片
-        cleanup_segments(segment_outputs)
-
-        # 清理 concat 列表文件
         try:
-            if concat_file.exists():
-                concat_file.unlink()
-        except Exception:
-            pass
+            # 2. 并行合成分片
+            segment_outputs = await compose_segments_parallel(
+                source_video, bar_video, segments, output_dir, config, source_info
+            )
 
-    return output_path
+            if len(segment_outputs) != len(segments):
+                raise RuntimeError(f"部分分片合成失败: {len(segment_outputs)}/{len(segments)} 成功")
+
+            # 3. 拼接分片
+            await concat_segments(segment_outputs, output_path, reencode=False)
+
+            return output_path
+        finally:
+            # 4. 无论成功失败都清理临时分片
+            cleanup_segments(segment_outputs)
+
+            # 清理 concat 列表文件
+            try:
+                if concat_file.exists():
+                    concat_file.unlink()
+            except Exception:
+                pass
